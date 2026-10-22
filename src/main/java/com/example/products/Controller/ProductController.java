@@ -1,17 +1,5 @@
 package com.example.products.Controller;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.example.products.dto.ProductRequest;
-import com.example.products.dto.ProductResponse;
-import com.example.products.dto.RequestDiscountProduct;
-import com.example.products.Exception.ResourceNotFoundException;
-import com.example.products.Model.Product;
-import com.example.products.Service.ProductService;
-
-import jakarta.validation.Valid;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -22,9 +10,21 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.products.Exception.ResourceNotFoundException;
+import com.example.products.Exception.StockExeption;
+import com.example.products.Model.Product;
+import com.example.products.Service.ProductService;
+import com.example.products.dto.ProductRequest;
+import com.example.products.dto.ProductResponse;
+import com.example.products.dto.RequestDiscountProduct;
+
+import jakarta.validation.Valid;
 
 
 
@@ -88,18 +88,41 @@ public ProductController(ProductService service) {
             return ResponseEntity.noContent().build();
     }
 
-  /*  @PatchMapping("/{id}")
-    public  ResponseEntity<String> updatePrice(@PathVariable Long id, @RequestBody RequestDiscountProduct request ){
-        Product product = service.findById(id).orElseThrow(
-            () ->
-            new ResourceNotFoundException("Product not found with id: " +id)
-        );
-        
-        product.getStock();
-        return  ResponseEntity.ok(toResponse(product));
+  
+  @PatchMapping ("/{id}")
+    public ResponseEntity<ProductResponse> updatePrice(@PathVariable Long id, @RequestBody RequestDiscountProduct request){
 
-        return new ResponseEntity.ok().build();
-    } */
+    Product product = service.findById(id).orElseThrow(
+        ()-> new ResourceNotFoundException("Product not found with id:" +id)
+    );
+
+    product.getStock();
+    return ResponseEntity.ok(toResponse(product));
+}
+@PatchMapping("/{id}/discount")
+    public ResponseEntity<ProductResponse> applyDiscount(
+            @PathVariable Long id, 
+            @Valid @RequestBody RequestDiscountProduct request) {
+
+        
+        Product product = service.findById(id).orElseThrow(
+            () -> new ResourceNotFoundException("Producto no encontrado con id: " + id)
+        );
+
+     
+        if (product.getStock()<= 0) {
+            throw new StockExeption("No se puede aplicar descuento a un producto sin stock");
+        }
+
+        double newPrice = product.getPrice() * (1 - (request.getPercentage() / 100.0));
+        product.setPrice(newPrice);
+
+    
+        Product updatedProduct = service.save(product, product.getCategory() != null ? product.getCategory().getId() : null);
+
+      
+        return ResponseEntity.ok(toResponse(updatedProduct));
+    }
 
     private ProductResponse toResponse(Product product) {
         return new ProductResponse(
