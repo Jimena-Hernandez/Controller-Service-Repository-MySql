@@ -5,11 +5,11 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import com.example.products.Repository.CategoryRepository;
-import com.example.products.Repository.ProductRepository;
 import com.example.products.Exception.ResourceNotFoundException;
 import com.example.products.Model.Category;
 import com.example.products.Model.Product;
+import com.example.products.Repository.CategoryRepository;
+import com.example.products.Repository.ProductRepository;
 
 @Service
 public class ProductService {
@@ -38,6 +38,22 @@ public class ProductService {
         product.setCategory(category);
         return repo.save(product);
     }
+
+    /*public Product discount(Long id, double percentage){
+        Product productBd = repo.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Product not found with id:" + id));
+
+        
+        if (productBd.getStock() <= 0) {
+            throw new StockException("No se puede aplicar descuento a un producto sin stock");
+        }
+
+    
+        double nuevoPrecio = productBd.getPrice() * (1 - (percentage / 100.0));
+
+        productBd.setPrice(nuevoPrecio);
+        return repo.save(productBd);
+    } */
 
     public Optional<Product> update(Long id, Product product, Long idCategory) {
 

@@ -88,8 +88,8 @@ public ProductController(ProductService service) {
             return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{id}")
-    public  ResponseEntity<String> updatePrice(@PathVariable Long id, @RequestBody RequestDiscountProduct){
+  /*  @PatchMapping("/{id}")
+    public  ResponseEntity<String> updatePrice(@PathVariable Long id, @RequestBody RequestDiscountProduct request ){
         Product product = service.findById(id).orElseThrow(
             () ->
             new ResourceNotFoundException("Product not found with id: " +id)
@@ -99,7 +99,7 @@ public ProductController(ProductService service) {
         return  ResponseEntity.ok(toResponse(product));
 
         return new ResponseEntity.ok().build();
-    }
+    } */
 
     private ProductResponse toResponse(Product product) {
         return new ProductResponse(
